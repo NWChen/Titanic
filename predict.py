@@ -26,5 +26,20 @@ men_onboard = data[men_only_stats,1].astype(np.float)
 proportion_women_survived = np.sum(women_onboard)/np.size(women_onboard)
 proportion_men_survived = np.sum(men_onboard)/np.size(men_onboard)
 
-print(proportion_men_survived)
-print(proportion_women_survived)
+print('%s for every 1 woman survived')%proportion_women_survived
+print('%s for every 1 man survived')%proportion_men_survived
+
+test_file = open("training.csv","rb")
+test_obj = csv.reader(test_file)
+header = test_obj.next()
+prediction_file = open("pGenderbasedmodel.csv","wb")
+prediction_file_obj = csv.writer(prediction_file)
+
+prediction_file_obj.writerow(["PassengerId", "Survived"])
+for row in test_obj:
+		if row[3] == "female":
+			prediction_file_obj.writerow([row[0],'1'])
+		else:
+			prediction_file_obj.writerow([row[0],'0'])
+test_file.close()
+prediction_file.close()
