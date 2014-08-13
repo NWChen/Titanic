@@ -17,3 +17,14 @@ passengers = np.size(data[0::,1].astype(np.float)) #convert csv strings to float
 survivors = np.sum(data[0::,1].astype(np.float)) 
 proportion_of_survivors = survivors/passengers;
 
+women_only_stats = data[0::,4] == "female" #find all elements in the gender column with value female
+men_only_stats = data[0::,4] != "female" #find all elements in the gender column with non-female value (male)
+
+women_onboard = data[women_only_stats,1].astype(np.float) #in column 1 (Survived), all the rows for which column 4 (gender) registers True for female
+men_onboard = data[men_only_stats,1].astype(np.float)
+
+proportion_women_survived = np.sum(women_onboard)/np.size(women_onboard)
+proportion_men_survived = np.sum(men_onboard)/np.size(men_onboard)
+
+print(proportion_men_survived)
+print(proportion_women_survived)
