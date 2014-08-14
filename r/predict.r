@@ -5,6 +5,7 @@
 
 #Linux
 setwd("/home/neil/Desktop/Dev/Titanic")
+results <- read.csv("/home/neil/Desktop/Dev/Titanic/r/results.csv")
 train <- read.csv("/home/neil/Desktop/Dev/Titanic/train.csv")
 test <- read.csv("/home/neil/Desktop/Dev/Titanic/test.csv")
 
@@ -34,3 +35,8 @@ aggregate(Survived ~ FareType + Pclass + Sex, data=train, FUN=p)
 test$Survived <- 0
 test$Survived[test$Sex=='female'] <- 1
 test$Survived[test$Sex=='female' & test$Pclass==3 & test$Fare>=20] <- 0
+
+results$PassengerID <- rep(0, length(test$PassengerID))
+results$Survived <- rep(0, length(test$Survived))
+results$PassengerID <- test$PassengerID
+results$Survived <- test$Survived
