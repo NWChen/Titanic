@@ -29,3 +29,8 @@ train$FareType[train$Fare>=20 & train$Fare<30] <- '20<30'
 
 #aggregate with new fare categories
 aggregate(Survived ~ FareType + Pclass + Sex, data=train, FUN=p)
+
+#having noticed that women in 3rd class with a $20+ ticket fared poorly in terms of survival, build a new prediction
+test$Survived <- 0
+test$Survived[test$Sex=='female'] <- 1
+test$Survived[test$Sex=='female' & test$Pclass==3 & test$Fare>=20] <- 0
