@@ -18,6 +18,14 @@ aggregate(Survived ~ Child+Sex, data=train, FUN=length) #find total number of pe
 #calculate aggregated proportions
 p <- function(x){
   return(sum(x)/length(x))
-  }
-
+}
 aggregate(Survived ~ Child+Sex, data=train, FUN=p)
+
+#bin fares into $10 categories
+train$FareType <- rep('30+', length(train$Fare))
+train$FareType[train$Fare<10] <- '<10'
+train$FareType[train$Fare>=10 & train$Fare<20] <- '10<20'
+train$FareType[train$Fare>=20 & train$Fare<30] <- '20<30'
+
+#aggregate with new fare categories
+aggregate(Survived ~ FareType + Pclass + Sex, data=train, FUN=p)
