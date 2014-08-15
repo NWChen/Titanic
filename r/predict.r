@@ -10,7 +10,6 @@
 
 #Linux
 setwd("/home/neil/Desktop/Dev/Titanic")
-results <- read.csv("/home/neil/Desktop/Dev/Titanic/r/results.csv")
 train <- read.csv("/home/neil/Desktop/Dev/Titanic/train.csv")
 test <- read.csv("/home/neil/Desktop/Dev/Titanic/test.csv")
 
@@ -20,8 +19,8 @@ library(rattle)
 library(rpart.plot)
 library(RColorBrewer)
 
-train$Child <- rep(0, length(train$Age)) #populate the Child dimension with 0sA
-train$Child[train$Age<=18] <- 1 #rows with Age<=18 are a 1 on the Child dimension
+#train$Child <- rep(0, length(train$Age)) #populate the Child dimension with 0sA
+#train$Child[train$Age<=18] <- 1 #rows with Age<=18 are a 1 on the Child dimension
 
 #Survived depends on Child variables and Sex variables
 aggregate(Survived ~ Child+Sex, data=train, FUN=sum) #set Survived to Child+Sex subsets, looking at the train dataframe and performing the sum function
@@ -34,10 +33,10 @@ p <- function(x){
 aggregate(Survived ~ Child+Sex, data=train, FUN=p)
 
 #bin fares into $10 categories
-train$FareType <- rep('30+', length(train$Fare))
-train$FareType[train$Fare<10] <- '<10'
-train$FareType[train$Fare>=10 & train$Fare<20] <- '10<20'
-train$FareType[train$Fare>=20 & train$Fare<30] <- '20<30'
+#train$FareType <- rep('30+', length(train$Fare))
+#train$FareType[train$Fare<10] <- '<10'
+#train$FareType[train$Fare>=10 & train$Fare<20] <- '10<20'
+#train$FareType[train$Fare>=20 & train$Fare<30] <- '20<30'
 
 #aggregate with new fare categories
 aggregate(Survived ~ FareType + Pclass + Sex, data=train, FUN=p)
@@ -52,6 +51,9 @@ test$Survived[test$Sex=='female' & test$Pclass==3 & test$Fare>=20] <- 0
 #class function for factor (categorical variable)
 fit <- rpart(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked, data=train, method="class")
 
+#override default limits for tree growth (complexity)
+#fit <- rpart(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked, data=train, method="class", control=rpart.control(minsplit=2, cp=0))
+
 #prettify decision tree (bad)
 plot(fit)
 text(fit)
@@ -61,6 +63,13 @@ fancyRpartPlot(fit)
 
 #Linux file path
 outstring = "/home/neil/Desktop/Dev/Titanic/r/dtree.csv"
-prediction <- predict(fit, test, type="class") #point function to fit and write to test dataframe, outputting 0/1 (class)
+prediction <- predict(fit, test
+                      
+                      ype="class") #point function to fit and write to test dataframe, outputting 0/1 (class)
 submission <- data.frame(PassengerId = test$PassengerId, Survived = prediction) #build a new dataframe for output
 write.csv(submission, file=outstring, row.names=FALSE) #write results to csv for viewing; don't want row labels, so set row.names false
+
+#populate test set with Survived column to match #columns in train
+test$Survived <- NA
+combination <- rbind(train, test) #row bind train and test by row
+View(combination)
