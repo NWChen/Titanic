@@ -23,14 +23,14 @@ library(RColorBrewer)
 #train$Child[train$Age<=18] <- 1 #rows with Age<=18 are a 1 on the Child dimension
 
 #Survived depends on Child variables and Sex variables
-aggregate(Survived ~ Child+Sex, data=train, FUN=sum) #set Survived to Child+Sex subsets, looking at the train dataframe and performing the sum function
-aggregate(Survived ~ Child+Sex, data=train, FUN=length) #find total number of people in each subset (child/female, nonchild/female, child/male, nonchild/male)
+#aggregate(Survived ~ Child+Sex, data=train, FUN=sum) #set Survived to Child+Sex subsets, looking at the train dataframe and performing the sum function
+#aggregate(Survived ~ Child+Sex, data=train, FUN=length) #find total number of people in each subset (child/female, nonchild/female, child/male, nonchild/male)
 
 #calculate aggregated proportions
-p <- function(x){
-  return(sum(x)/length(x))
-}
-aggregate(Survived ~ Child+Sex, data=train, FUN=p)
+#p <- function(x){
+#  return(sum(x)/length(x))
+#}
+#aggregate(Survived ~ Child+Sex, data=train, FUN=p)
 
 #bin fares into $10 categories
 #train$FareType <- rep('30+', length(train$Fare))
@@ -39,12 +39,12 @@ aggregate(Survived ~ Child+Sex, data=train, FUN=p)
 #train$FareType[train$Fare>=20 & train$Fare<30] <- '20<30'
 
 #aggregate with new fare categories
-aggregate(Survived ~ FareType + Pclass + Sex, data=train, FUN=p)
+#aggregate(Survived ~ FareType + Pclass + Sex, data=train, FUN=p)
 
 #having noticed that women in 3rd class with a $20+ ticket fared poorly in terms of survival, build a new prediction
-test$Survived <- 0
-test$Survived[test$Sex=='female'] <- 1
-test$Survived[test$Sex=='female' & test$Pclass==3 & test$Fare>=20] <- 0
+#test$Survived <- 0
+#test$Survived[test$Sex=='female'] <- 1
+#test$Survived[test$Sex=='female' & test$Pclass==3 & test$Fare>=20] <- 0
 
 #build decision tree on survival, passenger class, sex, age, #siblings/spouses aboard, #parents/children aboard, fare, port of embarkation
 #survival is categorical, so run class instead of anova
@@ -63,13 +63,34 @@ fancyRpartPlot(fit)
 
 #Linux file path
 outstring = "/home/neil/Desktop/Dev/Titanic/r/dtree.csv"
-prediction <- predict(fit, test
-                      
-                      ype="class") #point function to fit and write to test dataframe, outputting 0/1 (class)
+prediction <- predict(fit, test, type="class") #point function to fit and write to test dataframe, outputting 0/1 (class)
 submission <- data.frame(PassengerId = test$PassengerId, Survived = prediction) #build a new dataframe for output
 write.csv(submission, file=outstring, row.names=FALSE) #write results to csv for viewing; don't want row labels, so set row.names false
 
+#feature engineering
 #populate test set with Survived column to match #columns in train
 test$Survived <- NA
 combination <- rbind(train, test) #row bind train and test by row
-View(combination)
+combination$Name <- as.character(combination$Name) #convert Name factors to strings
+
+#split name to retrieve title (Ms, Mrs, Mr)
+#strsplit(combination$Name[1], split='[, .]')[[1]][3]
+
+#new column for titles
+sep <- function(x, i){
+  return (strsplit(x, split='[,.]')[[1]][i])
+}
+
+#Name vector and split function fed into sapply, perform the function to each corresponding element in Name, assign into Title
+combination$Title <- sapply(combination$Name, FUN=sep)
+
+#remove spaces
+combination$Title <- sub(' ', '', combination$Title)
+
+#merge names
+french = c('Mme', 'Mlle')
+mil = c('Capt', 'Don', 'Major', 'Sir')
+rich = c('Dona', 'Lady', 'the Countess', "Jonkheer") 
+combination$Title[combination$Title %in% french] <- 'Mlle'
+combination$FamilySize <- combination$SibSp + combination$Parch + 1 #combine #siblings with #parents/children, plus 1 for the person itself
+combination$Surname <- sapply(combination$Name, FUN=sep)
