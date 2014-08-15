@@ -1,3 +1,9 @@
+#FOR THE GRAPHICS - BE SURE TO INSTALL (install.packages()):
+#rattle
+#rpart.plot
+#RColoBrewer
+#(then run library())
+
 #Windows
 #setwd("C:/Users/Neil/Desktop/Research/titanic") #set working directory
 #train <- read.csv("C:/Users/Neil/Desktop/Research/titanic/train.csv") #import training set
@@ -8,6 +14,9 @@ setwd("/home/neil/Desktop/Dev/Titanic")
 results <- read.csv("/home/neil/Desktop/Dev/Titanic/r/results.csv")
 train <- read.csv("/home/neil/Desktop/Dev/Titanic/train.csv")
 test <- read.csv("/home/neil/Desktop/Dev/Titanic/test.csv")
+
+#import
+library(rpart)
 
 train$Child <- rep(0, length(train$Age)) #populate the Child dimension with 0sA
 train$Child[train$Age<=18] <- 1 #rows with Age<=18 are a 1 on the Child dimension
@@ -36,7 +45,11 @@ test$Survived <- 0
 test$Survived[test$Sex=='female'] <- 1
 test$Survived[test$Sex=='female' & test$Pclass==3 & test$Fare>=20] <- 0
 
-results$PassengerID <- rep(0, length(test$PassengerID))
-results$Survived <- rep(0, length(test$Survived))
-results$PassengerID <- test$PassengerID
-results$Survived <- test$Survived
+#build decision tree on survival, passenger class, sex, age, #siblings/spouses aboard, #parents/children aboard, fare, port of embarkation
+#survival is categorical, so run class instead of anova
+#class function for factor (categorical variable)
+fit <- rpart(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked, data=train, method="class")
+
+#prettify decision tree
+plot(fit)
+text(fit)
