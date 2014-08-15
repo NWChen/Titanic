@@ -1,8 +1,7 @@
 #FOR THE GRAPHICS - BE SURE TO INSTALL (install.packages()):
 #rattle
 #rpart.plot
-#RColoBrewer
-#(then run library())
+#RColorBrewer
 
 #Windows
 #setwd("C:/Users/Neil/Desktop/Research/titanic") #set working directory
@@ -17,6 +16,9 @@ test <- read.csv("/home/neil/Desktop/Dev/Titanic/test.csv")
 
 #import
 library(rpart)
+library(rattle)
+library(rpart.plot)
+library(RColorBrewer)
 
 train$Child <- rep(0, length(train$Age)) #populate the Child dimension with 0sA
 train$Child[train$Age<=18] <- 1 #rows with Age<=18 are a 1 on the Child dimension
@@ -50,6 +52,15 @@ test$Survived[test$Sex=='female' & test$Pclass==3 & test$Fare>=20] <- 0
 #class function for factor (categorical variable)
 fit <- rpart(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked, data=train, method="class")
 
-#prettify decision tree
+#prettify decision tree (bad)
 plot(fit)
 text(fit)
+
+#prettify decision tree (good)
+fancyRpartPlot(fit)
+
+#Linux file path
+outstring = "/home/neil/Desktop/Dev/Titanic/r/dtree.csv"
+prediction <- predict(fit, test, type="class") #point function to fit and write to test dataframe, outputting 0/1 (class)
+submission <- data.frame(PassengerId = test$PassengerId, Survived = prediction) #build a new dataframe for output
+write.csv(submission, file=outstring, row.names=FALSE) #write results to csv for viewing; don't want row labels, so set row.names false
