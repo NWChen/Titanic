@@ -3,11 +3,29 @@ import numpy as np
 import csv as csv
 from sklearn.ensemble import RandomForestClassifier
 
-#load in training data
+#load in data
 train_data = pd.read_csv('C:/Users/Neil/Desktop/Dev/Titanic/train.csv', header=0)
+test_data = pd.read_csv('C:/Users/Neil/Desktop/Dev/Titanic/test.csv', header=0)
 
+#convert objects to numbers
 train_data.Gender= train_data.Sex.map({'male':0, 'female':1}).astype(int)
-#train_data.
+train_data.Embarked[train_data.Embarked.isnull()] = train_data.Embarked.dropna().mode().values #fill	
 train_data.Embarked = train_data.Embarked.map({'C':0, 'Q':1, 'S':2}).astype(int)
+
+#ages with no data -> make median
+median_age = train_data.Age.dropna().median()
+train_data.loc[(train_data.Age.isnull()), 'Age'] = median_age
+
+train_data = train_data.drop(['Name', 'Sex', 'Ticket', 'Cabin', 'PassengerId'], axis=1)
+
+
+#create random forest object
+forest = RandomForestClassifier(n_estimators = 100)
+
+#fit training data to Survived labels
+forest = forest.fit(train_data[0::,1::], train_data[0::,0])
+
+#run decision trees on test data
+#output = forest.predict(test_data)
 
 print train_data.head(3)
